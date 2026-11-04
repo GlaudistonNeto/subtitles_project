@@ -90,7 +90,7 @@ Opções do pipeline (as mesmas no comando Ace e no formulário web):
 | `--language`, `-l` | `ja`, `zh` ou `auto` (padrão)                                         |
 | `--skip-refine`    | Pula a correção com Ollama                                            |
 | `--output`, `-o`   | Caminho do SRT (padrão: `<video>.en.srt`); na web, download do arquivo |
-| `--ollama-model`   | Modelo Ollama (padrão `qwen2.5:7b`; alternativa `qwen2.5:14b`)        |
+| `--ollama-model`   | Modelo Ollama (padrão `qwen2.5:14b`)        |
 | `--whisper-model`  | Modelo Whisper (padrão `large-v3`; mais rápido: `large-v3-turbo`)     |
 | `--keep-audio`     | Mantém o WAV temporário                                               |
 
@@ -111,7 +111,7 @@ Sincronização de tempo (regra crítica):
 
 Aceleração por GPU (CUDA):
 
-- Configure o `nodejs-whisper` para usar CUDA quando houver GPU NVIDIA. O ambiente de referência usa o CUDA Toolkit **13.5**; confirme no Context7 a flag/opção atual de build e execução e a versão mínima exigida, e verifique a versão instalada com `nvcc --version`, sem assumir. Se a versão instalada diferir, avise e prossiga.
+- Configure o `nodejs-whisper` para usar CUDA quando houver GPU NVIDIA. O ambiente de referência usa o CUDA Toolkit **13.x**; confirme no Context7 a flag/opção atual de build e execução e a versão mínima exigida, e verifique a versão instalada com `nvcc --version`, sem assumir. Se a versão instalada diferir, avise e prossiga.
 - Se não houver GPU/CUDA, o pipeline cai para CPU com um aviso no log e NÃO falha.
 - A decisão GPU/CPU fica isolada em uma função pura (ex.: montagem das opções de transcrição), para ser testável sem GPU.
 - Documente no README os pré-requisitos (driver NVIDIA, CUDA Toolkit, cmake e ferramentas de build) e o comando de rebuild do `nodejs-whisper` com CUDA.
