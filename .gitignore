@@ -1,0 +1,12 @@
+# Instaladores e arquivos do sistema
+*.deb
+*.run
+*.pin
+*:Zone.Identifier
+
+# Segredos e dependências
+.env
+node_modules/
+
+# Temporários do projeto
+tmp/
