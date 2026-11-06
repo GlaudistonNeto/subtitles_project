@@ -11,3 +11,5 @@ node_modules/
 # Temporários do projeto
 tmp/
 EOF
+# Playwright MCP Output
+.playwright-mcp/
