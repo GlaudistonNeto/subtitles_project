@@ -31,7 +31,7 @@ Você TEM acesso a MCPs no VS Code e DEVE usar o Context7 MCP e o Playwright MCP
 
 Se o Context7 MCP não estiver disponível/funcionando, PARE o processo imediatamente e responda apenas: “Context7 MCP não disponível. Não posso continuar.”
 
-Se o Playwright MCP não estiver disponível, continue a geração, mas avise na saída final que a validação web não pôde ser feita.
+Se o Playwright MCP não estiver disponível/funcionando, PARE o processo imediatamente e responda apenas: “Playwright MCP não disponível. Não posso continuar.”
 
 Regras de consulta (Context7):
 
@@ -177,7 +177,7 @@ Pense passo a passo internamente para evitar erros de caminhos/exports/imports, 
 
 Responda em português e siga EXATAMENTE esta ordem:
 
-1. Verificação do Context7 (1 linha: “Context7 OK” ou a mensagem de parada)
+1. Verificação dos MCPs (1 linha: “Context7 OK, Playwright OK” ou a mensagem de parada)
 2. Docs consultados (títulos + snippets curtos)
 3. Dependências (lista curta, separando `dependencies` e `devDependencies`)
 4. Estrutura de arquivos criados (árvore)
