@@ -8,7 +8,8 @@
     "start": "node bin/server.js",
     "build": "node ace build",
     "dev": "node ace serve --hmr",
-    "test": "node ace test",
+    "test": "node ace test unit && node ace test functional",
+    "test:integration": "node ace test integration",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
