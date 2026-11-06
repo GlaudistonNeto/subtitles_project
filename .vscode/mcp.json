@@ -1,6 +1,16 @@
 {
+  "inputs": [
+    { "type": "promptString", "id": "context7-key", "description": "Context7 API key", "password": true }
+  ],
   "servers": {
-    "context7": { "type": "stdio", "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
-    "playwright": { "type": "stdio", "command": "npx", "args": ["@playwright/mcp@latest"] }
+    "context7": {
+      "type": "http",
+      "url": "http://127.0.0.1:3001/mcp",
+      "headers": { "CONTEXT7_API_KEY": "${input:context7-key}" }
+    },
+    "playwright": {
+      "type": "http",
+      "url": "http://127.0.0.1:8931/mcp"
+    }
   }
 }
