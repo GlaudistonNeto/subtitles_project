@@ -17,11 +17,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_KEY: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
-
-  /*
-  |----------------------------------------------------------
-  | Variables for configuring session package
-  |----------------------------------------------------------
-  */
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
+  DEEPL_API_KEY: Env.schema.string(),
+  OLLAMA_HOST: (key, value) =>
+    Env.schema.string.optional()(key, value) ?? 'http://localhost:11434',
+  OLLAMA_MODEL: (key, value) =>
+    Env.schema.string.optional()(key, value) ?? 'qwen2.5:14b',
+  WHISPER_MODEL: (key, value) =>
+    Env.schema.string.optional()(key, value) ?? 'large-v3',
+  MAX_UPLOAD_MB: (key, value) => Env.schema.number.optional()(key, value) ?? 500,
 })
