@@ -10,6 +10,11 @@ node_modules/
 
 # Temporários do projeto
 tmp/
-EOF
 # Playwright MCP Output
 .playwright-mcp/
+whisper.cpp/models/
+whisper.cpp/build/
+build/
+public/assets/
+coverage/
+*.log
