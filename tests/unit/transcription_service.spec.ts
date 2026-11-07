@@ -1,10 +1,30 @@
 import { test } from '@japa/runner'
-import { buildWhisperOptions, resolveCuda, transcribe } from '../../app/services/transcription_service.js'
+import { buildWhisperOptions, detectCudaAddon, resolveCuda, transcribe } from '../../app/services/transcription_service.js'
 
 const options = buildWhisperOptions({ language: 'auto', modelName: 'base', modelRootPath: '/models', withCuda: false })
 
+test('detects the CUDA addon when the expected file exists', ({ assert }) => {
+  let checkedPath = ''
+  const found = detectCudaAddon((path) => {
+    checkedPath = String(path)
+    return true
+  })
+  assert.isTrue(found)
+  assert.isTrue(checkedPath.endsWith('build/cuda/Release/nodejs_whisper.node'))
+})
+
+test('reports the CUDA addon as unavailable when the expected file is absent', ({ assert }) => {
+  let checkedPath = ''
+  const found = detectCudaAddon((path) => {
+    checkedPath = String(path)
+    return false
+  })
+  assert.isFalse(found)
+  assert.isTrue(checkedPath.endsWith('build/cuda/Release/nodejs_whisper.node'))
+})
+
 test('preserves every segment timestamp without offsets', async ({ assert }) => {
-  const result = await transcribe('audio.wav', options, async () => ({ segments: [
+  const result = await transcribe('audio.wav', options, async () => ({ text: '', language: 'en', segments: [
     { start: 5_000, end: 5_480, text: 'First' },
     { start: 6_125, end: 7_000, text: 'Second' },
   ] }))
@@ -13,7 +33,7 @@ test('preserves every segment timestamp without offsets', async ({ assert }) => 
 })
 
 test('discards empty text and assigns sequential indices', async ({ assert }) => {
-  const result = await transcribe('audio.wav', options, async () => ({ segments: [
+  const result = await transcribe('audio.wav', options, async () => ({ text: '', language: 'en', segments: [
     { start: 0, end: 1, text: '  ' },
     { start: 2, end: 3, text: 'Kept' },
   ] }))
