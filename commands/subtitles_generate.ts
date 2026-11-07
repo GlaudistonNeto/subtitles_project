@@ -1,14 +1,8 @@
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { BaseCommand, args, flags } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 import env from '#start/env'
-import { AudioService } from '#services/audio_service'
-import { generateSrt } from '#services/srt_service'
 import { runPipeline, type PipelineDeps, type PipelineOptions } from '#services/subtitle_pipeline'
-import { detectCudaAddon, resolveCuda, transcribe } from '#services/transcription_service'
-import { refineSegments } from '#services/refinement_service'
-import { translateSegments } from '#services/translation_service'
+import { buildPipelineDeps } from '#services/pipeline_deps'
 
 export default class SubtitlesGenerateCommand extends BaseCommand {
   static commandName = 'subtitles:generate'
@@ -36,17 +30,6 @@ export default class SubtitlesGenerateCommand extends BaseCommand {
   @flags.boolean({ description: 'Keep the temporary WAV file' })
   declare keepAudio?: boolean
 
-  protected pipelineDeps(): PipelineDeps {
-    return {
-      audio: new AudioService(), transcribe, refine: (segments, language, model) =>
-        refineSegments(segments, language, model, env.get('OLLAMA_HOST')),
-      translate: translateSegments, generateSrt, writeFile: (path, content) => writeFile(path, content, 'utf8'),
-      detectCudaAddon, resolveCuda, deeplApiKey: env.get('DEEPL_API_KEY'),
-      modelRootPath: join(process.cwd(), 'tmp', 'whisper-models'),
-      logger: { warn: (message) => this.logger.info(message) },
-    }
-  }
-
   protected runPipeline(video: string, options: PipelineOptions, deps: PipelineDeps): Promise<string> {
     return runPipeline(video, options, deps)
   }
@@ -64,7 +47,7 @@ export default class SubtitlesGenerateCommand extends BaseCommand {
       whisperModel: this.whisperModel ?? env.get('WHISPER_MODEL'), keepAudio: this.keepAudio ?? false,
     }
     try {
-      this.logger.info(`SRT generated: ${await this.runPipeline(this.video, options, this.pipelineDeps())}`)
+      this.logger.info(`SRT generated: ${await this.runPipeline(this.video, options, buildPipelineDeps((message) => this.logger.info(message)))}`)
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'unknown error'
       this.logger.error(`Subtitle generation failed: ${detail}`)

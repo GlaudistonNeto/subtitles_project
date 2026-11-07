@@ -8,5 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import SubtitlesController from '#controllers/subtitles_controller'
 
 router.on('/').render('pages/home')
+router.post('/subtitles', [SubtitlesController, 'store'])

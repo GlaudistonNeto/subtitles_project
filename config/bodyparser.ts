@@ -1,4 +1,5 @@
 import { defineConfig } from '@adonisjs/core/bodyparser'
+import env from '#start/env'
 
 const bodyParserConfig = defineConfig({
   /**
@@ -47,7 +48,7 @@ const bodyParserConfig = defineConfig({
      * Maximum limit of data to parse including all files
      * and fields
      */
-    limit: '20mb',
+    limit: `${env.get('MAX_UPLOAD_MB')}mb`,
     types: ['multipart/form-data'],
   },
 })
