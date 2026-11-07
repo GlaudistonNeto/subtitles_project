@@ -3,9 +3,9 @@ import type { Segment } from '../types/subtitles.js'
 
 function makePrompt(language: string, context: string[], texts: string[]): string {
   const data = `CONTEXT_JSON:${JSON.stringify(context)}\nINPUT_JSON:${JSON.stringify(texts)}`
-  if (language === 'ja') return `音声認識の誤りを修正してください。同音異義語の漢字や助詞を文脈に基づいて直してください。前のバッチは読み取り専用の文脈です。入力と同じ数の文字列を含むJSON配列だけを返してください。\n${data}`
-  if (language === 'zh') return `请根据上下文纠正语音识别错误，包括同音汉字和助词。上一批内容仅供只读参考。只返回JSON字符串数组，数量必须与输入完全相同。\n${data}`
-  return `Correct speech recognition errors, including homophones and particles. The previous batch is read-only context. Return only a JSON array of strings with exactly the same number of items as the input.\n${data}`
+  if (language === 'ja') return `音声認識の誤りを修正してください。同音異義語の漢字や助詞を文脈に基づいて直してください。前のバッチは読み取り専用の文脈です。入力と同じ数の文字列を含む配列を持つ、linesのみをキーとするJSONオブジェクトを返してください。\n${data}`
+  if (language === 'zh') return `请根据上下文纠正语音识别错误，包括同音汉字和助词。上一批内容仅供只读参考。只返回一个JSON对象，唯一键为lines，其值为字符串数组，数量必须与输入完全相同。\n${data}`
+  return `Correct speech recognition errors, including homophones and particles. The previous batch is read-only context. Return only a JSON object with the single key lines, whose value is an array of strings with exactly the same number of items as the input.\n${data}`
 }
 
 export async function refineSegments(
@@ -20,9 +20,11 @@ export async function refineSegments(
     try {
       const response = await request(`${host.replace(/\/+$/, '')}/api/chat`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ model, stream: false, format: 'json', options: { temperature: 0 },
+        body: JSON.stringify({ model, stream: false,
+          format: { type: 'object', properties: { lines: { type: 'array', items: { type: 'string' } } }, required: ['lines'] },
+          ...(start + batch.length === segments.length ? { keep_alive: 0 } : {}), options: { temperature: 0 },
           messages: [{ role: 'user', content: makePrompt(sourceLanguage, context, refined) }] }),
-        signal: AbortSignal.timeout(60_000),
+        signal: AbortSignal.timeout(180_000),
       })
       if (!response.ok) throw new Error(`Ollama returned HTTP ${response.status}`)
       const payload: unknown = await response.json()
@@ -30,10 +32,12 @@ export async function refineSegments(
         typeof payload.message !== 'object' || payload.message === null || !('content' in payload.message) ||
         typeof payload.message.content !== 'string') throw new Error('Ollama response has no message content')
       const parsed: unknown = JSON.parse(payload.message.content)
-      if (!Array.isArray(parsed) || parsed.length !== batch.length || !parsed.every((line) => typeof line === 'string')) {
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed) || !('lines' in parsed) ||
+        !Array.isArray(parsed.lines) || parsed.lines.length !== batch.length ||
+        !parsed.lines.every((line) => typeof line === 'string')) {
         throw new Error('Ollama returned an invalid number or type of lines')
       }
-      refined = parsed
+      refined = parsed.lines
     } catch (error) {
       console.warn(`Ollama refinement failed for segments ${start + 1}-${start + batch.length}; keeping original text.`, error)
     }

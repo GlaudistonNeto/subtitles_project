@@ -46,6 +46,30 @@ test('skips refinement and derives the default output path', async ({ assert }) 
   assert.equal(state.writes[0].path, path)
 })
 
+test('discards empty translations, renumbers segments, and preserves their times', async ({ assert }) => {
+  const translatedSegments: Segment[] = [
+    { index: 10, startMs: 1_000, endMs: 2_500, text: '' },
+    { index: 20, startMs: 3_000, endMs: 4_500, text: '   ' },
+    { index: 30, startMs: 5_000, endMs: 7_000, text: 'First' },
+    { index: 40, startMs: 8_000, endMs: 10_000, text: 'Second' },
+  ]
+  let generatedSegments: Segment[] = []
+  const state = harness({
+    transcribe: async () => translatedSegments,
+    translate: async (segments) => segments,
+    generateSrt: (segments) => {
+      generatedSegments = segments
+      return generateSrt(segments)
+    },
+  })
+
+  await runPipeline('clip.mp4', options, state.deps)
+
+  assert.deepEqual(generatedSegments.map(({ index }) => index), [1, 2])
+  assert.deepEqual(generatedSegments.map(({ startMs, endMs }) => [startMs, endMs]), [[5_000, 7_000], [8_000, 10_000]])
+  assert.equal(state.writes[0].content, '1\n00:00:05,000 --> 00:00:07,000\nFirst\n\n2\n00:00:08,000 --> 00:00:10,000\nSecond')
+})
+
 test('cleans the temporary WAV when translation fails', async ({ assert }) => {
   const state = harness({ translate: async () => { throw new Error('translation failed') } })
   let failed = false

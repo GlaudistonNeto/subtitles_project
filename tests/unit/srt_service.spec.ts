@@ -66,3 +66,13 @@ test('preserves initial silence and numbers cues sequentially', ({ assert }) => 
   assert.include(srt, '1\n00:00:05,000 --> 00:00:06,000\nSpeech begins')
   assert.include(srt, '2\n00:00:06,500 --> 00:00:07,500\nNext speech')
 })
+
+test('ignores segments with empty or whitespace-only text', ({ assert }) => {
+  const srt = generateSrt([
+    { index: 1, startMs: 1_000, endMs: 2_000, text: '' },
+    { index: 2, startMs: 3_000, endMs: 4_000, text: '   ' },
+    { index: 3, startMs: 5_000, endMs: 6_000, text: 'Visible' },
+  ])
+
+  assert.equal(srt, '1\n00:00:05,000 --> 00:00:06,000\nVisible')
+})

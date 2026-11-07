@@ -43,6 +43,8 @@ export async function runPipeline(
     let segments = await deps.transcribe(wavPath, whisperOptions)
     if (!options.skipRefine) segments = await deps.refine(segments, options.language, options.ollamaModel)
     segments = await deps.translate(segments, options.language, deps.deeplApiKey)
+    segments = segments.filter((segment) => segment.text.trim().length > 0)
+      .map((segment, index) => ({ ...segment, index: index + 1 }))
     await deps.writeFile(outputPath, deps.generateSrt(segments))
     return outputPath
   }, options.keepAudio ?? false)

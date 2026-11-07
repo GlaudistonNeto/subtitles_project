@@ -23,7 +23,7 @@ test('batches 20 segments, supplies previous context, and preserves timestamps',
     prompts.push(body.messages[0].content)
     const texts = readInput(init)
     requests.push(texts)
-    return response(JSON.stringify(texts.map((text) => `fixed ${text}`)))
+    return response(JSON.stringify({ lines: texts.map((text) => `fixed ${text}`) }))
   })
   assert.deepEqual(requests.map(({ length }) => length), [8, 8, 4])
   assert.include(prompts[1], `CONTEXT_JSON:${JSON.stringify(requests[0].map((text) => `fixed ${text}`))}`)
@@ -38,9 +38,36 @@ test('keeps original text after a network failure', async ({ assert }) => {
   assert.deepEqual(result.map(({ text }) => text), input.map(({ text }) => text))
 })
 
+test('sends a structured schema for lines', async ({ assert }) => {
+  let format: unknown
+  await call(async (_url, init) => {
+    format = JSON.parse(String(init?.body)).format
+    return response(JSON.stringify({ lines: ['fixed line 0'] }))
+  })
+  assert.deepEqual(format, {
+    type: 'object', properties: { lines: { type: 'array', items: { type: 'string' } } }, required: ['lines'],
+  })
+})
+
+test('keeps original text when the response is an array at the root', async ({ assert }) => {
+  const input = segments(1)
+  const result = await call(async () => response(' ["fixed line 0"] '), input)
+  assert.deepEqual(result.map(({ text }) => text), input.map(({ text }) => text))
+})
+
+test('sets keep_alive to zero only on the last request', async ({ assert }) => {
+  const keepAliveValues: unknown[] = []
+  await call(async (_url, init) => {
+    const body = JSON.parse(String(init?.body))
+    keepAliveValues.push(body.keep_alive)
+    return response(JSON.stringify({ lines: readInput(init) }))
+  }, segments(20))
+  assert.deepEqual(keepAliveValues, [undefined, undefined, 0])
+})
+
 test('keeps original text when the response has the wrong number of lines', async ({ assert }) => {
   const input = segments(2)
-  const result = await call(async () => response('["only one"]'), input)
+  const result = await call(async () => response('{"lines":["only one"]}'), input)
   assert.deepEqual(result.map(({ text }) => text), input.map(({ text }) => text))
 })
 

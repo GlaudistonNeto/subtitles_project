@@ -46,7 +46,7 @@ function timestamp(ms: number): string {
 }
 
 export function generateSrt(segments: Segment[]): string {
-  const cues = segments.flatMap((segment) => {
+  const cues = segments.filter((segment) => segment.text.trim().length > 0).flatMap((segment) => {
     const lines = wrapText(segment.text)
     const parts: string[] = []
     for (let index = 0; index < lines.length; index += 2) parts.push(lines.slice(index, index + 2).join('\n'))
