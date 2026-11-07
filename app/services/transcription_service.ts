@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
+import type { VadModelName } from 'nodejs-whisper'
 import type { Segment } from '../types/subtitles.js'
 
 const require = createRequire(import.meta.url)
@@ -8,6 +9,7 @@ const require = createRequire(import.meta.url)
 export type WhisperCallOptions = {
   modelName: string
   autoDownloadModelName: string
+  autoDownloadVadModelName: VadModelName
   modelRootPath: string
   withCuda: boolean
   removeWavFileAfterTranscription: false
@@ -46,7 +48,8 @@ export function buildWhisperOptions({
   language, modelName, modelRootPath, withCuda,
 }: { language: string; modelName: string; modelRootPath: string; withCuda: boolean }): WhisperCallOptions {
   return {
-    modelName, autoDownloadModelName: modelName, modelRootPath, withCuda, removeWavFileAfterTranscription: false,
+    modelName, autoDownloadModelName: modelName, autoDownloadVadModelName: 'silero-v6.2.0', modelRootPath, withCuda,
+    removeWavFileAfterTranscription: false,
     whisperOptions: { ...(language === 'auto' ? {} : { language }), outputInJsonFull: true },
   }
 }

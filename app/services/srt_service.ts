@@ -46,14 +46,30 @@ function timestamp(ms: number): string {
 }
 
 export function generateSrt(segments: Segment[]): string {
-  return segments.map((segment, index) => {
+  const cues = segments.flatMap((segment) => {
     const lines = wrapText(segment.text)
-    if (lines.length > 2) throw new RangeError('Subtitle text exceeds two lines of 42 characters')
-    let endMs = segment.endMs
-    if (endMs - segment.startMs < 1_000) {
-      endMs = segment.startMs + 1_000
-      if (segments[index + 1]) endMs = Math.max(segment.startMs, Math.min(endMs, segments[index + 1].startMs))
+    const parts: string[] = []
+    for (let index = 0; index < lines.length; index += 2) parts.push(lines.slice(index, index + 2).join('\n'))
+    if (!parts.length) parts.push('')
+    const weights = parts.map((part) => Array.from(part.replace(/\n/gu, '')).length || 1)
+    const total = weights.reduce((sum, weight) => sum + weight, 0)
+    const duration = segment.endMs - segment.startMs
+    let allocated = 0
+    return parts.map((text, index) => {
+      const startMs = segment.startMs + Math.round(duration * allocated / total)
+      allocated += weights[index]
+      const endMs = index === parts.length - 1
+        ? segment.endMs
+        : segment.startMs + Math.round(duration * allocated / total)
+      return { startMs, endMs, text, split: parts.length > 1 }
+    })
+  })
+  return cues.map((cue, index) => {
+    let endMs = cue.endMs
+    if (endMs - cue.startMs < 1_000 && !cue.split) {
+      endMs = cue.startMs + 1_000
+      if (cues[index + 1]) endMs = Math.max(cue.startMs, Math.min(endMs, cues[index + 1].startMs))
     }
-    return `${index + 1}\n${timestamp(segment.startMs)} --> ${timestamp(endMs)}\n${lines.join('\n')}`
+    return `${index + 1}\n${timestamp(cue.startMs)} --> ${timestamp(endMs)}\n${cue.text}`
   }).join('\n\n')
 }

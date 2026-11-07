@@ -54,5 +54,6 @@ test('forces Japanese while leaving auto detection unset', ({ assert }) => {
   assert.isUndefined(automatic.whisperOptions.language)
   assert.equal(japanese.autoDownloadModelName, 'base')
   assert.equal(automatic.autoDownloadModelName, 'base')
+  assert.equal(automatic.autoDownloadVadModelName, 'silero-v6.2.0')
   assert.isFalse(automatic.removeWavFileAfterTranscription)
 })

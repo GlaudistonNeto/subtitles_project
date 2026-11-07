@@ -65,8 +65,9 @@ export default class SubtitlesGenerateCommand extends BaseCommand {
     }
     try {
       this.logger.info(`SRT generated: ${await this.runPipeline(this.video, options, this.pipelineDeps())}`)
-    } catch {
-      this.logger.error('Subtitle generation failed. No SRT was produced.')
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'unknown error'
+      this.logger.error(`Subtitle generation failed: ${detail}`)
       this.exitCode = 1
     }
   }

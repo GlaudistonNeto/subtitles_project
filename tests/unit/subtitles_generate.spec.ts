@@ -57,6 +57,6 @@ test.group('subtitles:generate', (group) => {
     const command = await ace.create(FakePipelineCommand, ['clip.mp4'])
     await command.exec()
     assert.equal(command.exitCode, 1)
-    command.assertLog('[ red(error) ] Subtitle generation failed. No SRT was produced.')
+    command.assertLog('[ red(error) ] Subtitle generation failed: test failure')
   })
 })

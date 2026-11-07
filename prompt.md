@@ -108,6 +108,7 @@ Sincronização de tempo (regra crítica):
 - Cada legenda usa os timestamps reais de início/fim do segmento falado, vindos do Whisper. A primeira legenda NUNCA começa em 00:00:00,000 só porque o vídeo começou; se há silêncio ou música antes da primeira fala, a legenda começa quando a fala começa.
 - Os tempos de cada segmento (`startMs`, `endMs`) são preservados intactos por refino, tradução e quebra de linhas. A regra de duração mínima de 1 s só pode estender o FIM de uma legenda (sem ultrapassar o início da próxima); nunca antecipa o início.
 - Confirme no Context7 como obter timestamps por segmento no `nodejs-whisper` (formato de saída) e faça o parsing correto, incluindo a conversão para milissegundos.
+- Ative o VAD do `nodejs-whisper` (`autoDownloadVadModelName: 'silero-v6.2.0'`): sem ele, o Whisper prende o início do primeiro segmento em 0 s quando há silêncio no começo do áudio, e a legenda aparece antes da fala. Com o VAD, os tempos continuam referidos ao áudio original (os tempos por palavra deixam de existir, e o projeto não os usa). Teste manual obrigatório: o mesmo áudio com 5 s de silêncio acrescentados na frente deve ter a primeira legenda perto de 5 s, e nenhuma antes disso.
 
 Aceleração por GPU (CUDA):
 
