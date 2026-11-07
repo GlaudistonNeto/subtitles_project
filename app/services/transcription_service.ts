@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url)
 
 export type WhisperCallOptions = {
   modelName: string
+  autoDownloadModelName: string
   modelRootPath: string
   withCuda: boolean
   removeWavFileAfterTranscription: false
@@ -45,7 +46,7 @@ export function buildWhisperOptions({
   language, modelName, modelRootPath, withCuda,
 }: { language: string; modelName: string; modelRootPath: string; withCuda: boolean }): WhisperCallOptions {
   return {
-    modelName, modelRootPath, withCuda, removeWavFileAfterTranscription: false,
+    modelName, autoDownloadModelName: modelName, modelRootPath, withCuda, removeWavFileAfterTranscription: false,
     whisperOptions: { ...(language === 'auto' ? {} : { language }), outputInJsonFull: true },
   }
 }

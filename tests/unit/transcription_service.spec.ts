@@ -52,5 +52,7 @@ test('forces Japanese while leaving auto detection unset', ({ assert }) => {
   const automatic = buildWhisperOptions({ language: 'auto', modelName: 'base', modelRootPath: '/models', withCuda: false })
   assert.equal(japanese.whisperOptions.language, 'ja')
   assert.isUndefined(automatic.whisperOptions.language)
+  assert.equal(japanese.autoDownloadModelName, 'base')
+  assert.equal(automatic.autoDownloadModelName, 'base')
   assert.isFalse(automatic.removeWavFileAfterTranscription)
 })
