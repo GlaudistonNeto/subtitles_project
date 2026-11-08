@@ -117,6 +117,9 @@ Aceleração por GPU (CUDA):
 - A decisão GPU/CPU fica isolada em uma função pura (ex.: montagem das opções de transcrição), para ser testável sem GPU.
 - Documente no README os pré-requisitos (driver NVIDIA, CUDA Toolkit, cmake e ferramentas de build) e o comando de rebuild do `nodejs-whisper` com CUDA.
 
+- Texto que exceder 2 linhas de 42 caracteres NÃO gera erro: é dividido em várias legendas consecutivas, repartindo o intervalo do segmento em proporção ao número de caracteres.
+- Segmentos de texto vazio depois da tradução são descartados e os índices renumerados, sem alterar os tempos dos demais.
+
 Interface web (mínima, para o Playwright validar):
 
 - `GET /`: página com um formulário (campo de arquivo `video`, seleção de idioma `auto/ja/zh`, checkbox `skip-refine`, seleção do modelo Whisper, botão “Gerar legenda”), título e textos em português.

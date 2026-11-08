@@ -1,64 +1,46 @@
-# AdonisJS Web Starter Kit
+# subtitles_project
 
-This repo contains an AdonisJS application tailored for building a server-side rendered application using the [Edge template engine](https://edgejs.dev).
+Gera legendas SRT em inglês a partir de vídeos ou áudios falados em japonês, chinês ou outros idiomas.
+Transcrição e refino são locais; só a tradução usa a API do DeepL.
 
-## What's included
+Pipeline: FFmpeg → Whisper large-v3 (GPU/CUDA, com VAD) → Ollama (corrige erros de reconhecimento) → DeepL (EN-US) → `.srt`
 
-- TypeScript setup with commands to run developments server using `ts-node + swc` and create production build.
-- ESLint and Prettier setup extending the [AdonisJS tooling config](https://github.com/adonisjs/tooling-config) presets.
-- Ace command line framework.
-- Everything else you get with the core of AdonisJS.
+## Requisitos
+- Node.js 22+, pnpm, FFmpeg, CMake e um compilador C++
+- Ollama com o modelo: `ollama pull qwen2.5:14b`
+- Chave de API do DeepL (plano gratuito serve)
+- Opcional: GPU NVIDIA com CUDA Toolkit 13.x (sem GPU, roda em CPU, mais devagar)
 
-On top of the framework core and dev-tooling, the following features are enabled by the web starter kit.
+## Instalação
+```bash
+pnpm install
+NODEJS_WHISPER_CUDA=1 pnpm rebuild nodejs-whisper   # compila o Whisper com CUDA (demora)
+cp .env.example .env
+node ace generate:key
+# edite o .env e preencha DEEPL_API_KEY
+```
+O modelo `large-v3` (~3 GB) é baixado na primeira execução para `tmp/whisper-models/`.
 
-- Lucid ORM ( Installed, but not configured )
-- Auth module ( Installed, but not configured )
-- CSRF protection
-- Edge template engine
-- VineJS for validations
-- Static files server
-- Vite for bundling and serving frontend assets
+## Uso
+```bash
+node ace subtitles:generate video.mp4 --language ja
+```
+Opções: `--language ja|zh|auto`, `--skip-refine`, `--output caminho.srt`, `--ollama-model`, `--whisper-model`, `--keep-audio`.
+O resultado vai para `<video>.en.srt`.
 
-## Usage
+Interface web: `pnpm dev` e abra http://localhost:3333 (um processamento por vez).
 
-You can create a new app using the `web` boilerplate by executing the following command. The command will perform the following steps.
-
-- Clone the repo
-- Install dependencies
-- Copy `.env.example` to `.env`
-- Set app key using `node ace generate:key` command.
-- Configure `@adonisjs/lucid` package.
-- Configure `@adonisjs/auth` package.
-
-```sh
-npm init adonisjs@latest -- -K=web
+## Testes
+```bash
+pnpm typecheck
+pnpm test
 ```
 
-### Configuring Lucid database dialect
+## Como os tempos são tratados
+Cada legenda usa o início e o fim reais do segmento falado. O VAD do Whisper impede que a primeira legenda comece em 0 s quando o áudio tem silêncio no início. O refino e a tradução só alteram o texto, nunca os tempos. Textos longos viram várias legendas de até 2 linhas de 42 caracteres.
 
-By default, the `npm init adonisjs@latest` command configures Lucid to use `sqlite`. However, you can define a custom database dialect as follows.
+## Limitações
+O Whisper às vezes inventa uma frase curta depois do fim da fala. A chave do DeepL fica só no `.env`, que não vai para o Git.
 
-```sh
-npm init adonisjs@latest -- -K=web --db=postgres
-```
-
-Available options for the `--db` flag.
-
-- sqlite
-- postgres
-- mysql
-- mssql
-
-### Configuring Auth package guard
-
-By default, the `npm init adonisjs@latest` command configures the Auth package to use `session` guard. However, you can define a custom auth guard as follows.
-
-```sh
-npm init adonisjs@latest -- -K=web --auth-guard=access_tokens
-```
-
-Available options for the `--auth-guard` flag.
-
-- session
-- basic_auth
-- access_tokens
+## Licença
+MIT
