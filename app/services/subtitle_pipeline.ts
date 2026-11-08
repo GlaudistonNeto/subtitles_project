@@ -1,4 +1,5 @@
 import { parse, join } from 'node:path'
+import { collapseRepeats } from './segment_filters.js'
 import { buildWhisperOptions, resolveCuda } from './transcription_service.js'
 import type { WhisperCallOptions } from './transcription_service.js'
 import type { Segment } from '../types/subtitles.js'
@@ -40,7 +41,7 @@ export async function runPipeline(
     modelRootPath: deps.modelRootPath, withCuda: cuda.withCuda,
   })
   return deps.audio.withAudio(videoPath, async (wavPath) => {
-    let segments = await deps.transcribe(wavPath, whisperOptions)
+    let segments = collapseRepeats(await deps.transcribe(wavPath, whisperOptions))
     if (!options.skipRefine) segments = await deps.refine(segments, options.language, options.ollamaModel)
     segments = await deps.translate(segments, options.language, deps.deeplApiKey)
     segments = segments.filter((segment) => segment.text.trim().length > 0)
