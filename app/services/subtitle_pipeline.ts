@@ -1,5 +1,6 @@
 import { parse, join } from 'node:path'
 import { collapseRepeats } from './segment_filters.js'
+import { splitWav } from './audio_chunker.js'
 import { buildWhisperOptions, resolveCuda } from './transcription_service.js'
 import type { WhisperCallOptions } from './transcription_service.js'
 import type { Segment } from '../types/subtitles.js'
@@ -17,6 +18,7 @@ export type PipelineDeps = {
   audio: {
     withAudio<T>(videoPath: string, consumer: (wavPath: string) => Promise<T>, keepAudio?: boolean): Promise<T>
   }
+  splitWav?: typeof splitWav
   transcribe: (wavPath: string, options: WhisperCallOptions) => Promise<Segment[]>
   refine: (segments: Segment[], language: string, model?: string) => Promise<Segment[]>
   translate: (segments: Segment[], language: string, apiKey: string) => Promise<Segment[]>
@@ -26,7 +28,7 @@ export type PipelineDeps = {
   resolveCuda: typeof resolveCuda
   deeplApiKey: string
   modelRootPath: string
-  logger: { warn(message: string): void }
+  logger: { warn(message: string): void; info?(message: string): void }
 }
 
 export async function runPipeline(
@@ -41,7 +43,23 @@ export async function runPipeline(
     modelRootPath: deps.modelRootPath, withCuda: cuda.withCuda,
   })
   return deps.audio.withAudio(videoPath, async (wavPath) => {
-    let segments = collapseRepeats(await deps.transcribe(wavPath, whisperOptions))
+    const splitAudio = deps.splitWav ?? (async (path: string) => ({
+      chunks: [{ path, startMs: 0, durationMs: 0 }], cleanup: async () => {},
+    }))
+    const split = await splitAudio(wavPath, { chunkSeconds: 600 })
+    let segments: Segment[] = []
+    try {
+      for (const [index, chunk] of split.chunks.entries()) {
+        deps.logger.info?.(`Pedaço ${index + 1}/${split.chunks.length}`)
+        const chunkSegments = await deps.transcribe(chunk.path, whisperOptions)
+        segments.push(...chunkSegments.map((segment) => ({
+          ...segment, startMs: segment.startMs + chunk.startMs, endMs: segment.endMs + chunk.startMs,
+        })))
+      }
+    } finally {
+      await split.cleanup()
+    }
+    segments = collapseRepeats(segments.map((segment, index) => ({ ...segment, index: index + 1 })))
     if (!options.skipRefine) segments = await deps.refine(segments, options.language, options.ollamaModel)
     segments = await deps.translate(segments, options.language, deps.deeplApiKey)
     segments = segments.filter((segment) => segment.text.trim().length > 0)
