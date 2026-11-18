@@ -1,6 +1,12 @@
 {
   "inputs": [
-    { "type": "promptString", "id": "context7-key", "description": "Context7 API key", "password": true }
+    { 
+      "type": "promptString", 
+      "id": "context7-key", 
+      "description": "Context7 API key", 
+      "password": true,
+      "default": "ctx7sk-6f80e547-fc5e-4744-b387-371c957561b5"
+    }
   ],
   "servers": {
     "context7": {

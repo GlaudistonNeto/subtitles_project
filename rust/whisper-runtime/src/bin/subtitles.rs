@@ -20,7 +20,7 @@ enum Commands {
 #[derive(Debug, Args)]
 struct GenerateArgs {
     video: PathBuf,
-    #[arg(short = 'l', long, default_value = "auto", value_parser = ["ja", "zh", "auto"])]
+    #[arg(short = 'l', long, default_value = "auto", value_parser = ["ja", "zh", "en", "es", "pt", "de", "ru", "auto"])]
     language: String,
     #[arg(long)]
     skip_refine: bool,
