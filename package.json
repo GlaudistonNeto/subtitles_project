@@ -1,0 +1,32 @@
+{
+  "name": "subtitles_project",
+  "version": "1.0.0",
+  "description": "Gera legendas SRT em inglês a partir de vídeos ou áudios falados em japonês, chinês ou outros idiomas. Transcrição e refino são locais; só a tradução usa a API do DeepL.",
+  "main": "./rust/whisper-runtime/src/bin/subtitles.rs",
+  "type": "module",
+  "scripts": {
+    "build": "cd rust/whisper-runtime && cargo build --release && cp rust/whisper-runtime/target/release/subtitles bin/",
+    "start": "subtitles serve",
+    "generate": "subtitles generate video.mp4 --language ja"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GlaudistonNeto/subtitles_project.git"
+  },
+  "keywords": [
+    "subtitles",
+    "rust",
+    "whisper",
+    "srt",
+    "translation",
+    "deep-l",
+    "ollama"
+  ],
+  "bugs": {
+    "url": "https://github.com/GlaudistonNeto/subtitles_project/issues"
+  },
+  "homepage": "https://github.com/GlaudistonNeto/subtitles_project#readme",
+  "bin": {
+    "subtitles": "./bin/subtitles"
+  }
+}
