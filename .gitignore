@@ -18,4 +18,5 @@ build/
 public/assets/
 coverage/
 *.log
+**/target/
 models/

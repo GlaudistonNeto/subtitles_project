@@ -1,0 +1,23 @@
+# Rust build artifacts
+**/target/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables (secrets)
+.env
+
+# Temporary files
+tmp/
+
+# Node.js dependencies (if still using npm for some reason)
+node_modules/
+
+# Build output from other tools
+dist/
+out/
