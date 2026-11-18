@@ -1,0 +1,27 @@
+# Rust build artifacts
+**/target/
+
+# Rust source code generated
+.rustc_info.json
+
+# Temporary binaries (optional)
+build/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+
+# Node.js (if still using npm for some reason)
+node_modules/
+
+# Build output from other tools
+dist/
+out/
+build/

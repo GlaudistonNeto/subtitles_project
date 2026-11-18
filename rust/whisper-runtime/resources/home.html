@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerar legenda</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root { color-scheme: light dark; font: 16px system-ui, sans-serif; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: Canvas; color: CanvasText; }
+    main { min-width: 0; width: min(30rem, calc(100% - 2rem)); }
+    form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 1.5rem; border: 1px solid GrayText; border-radius: .5rem; }
+    label { min-width: 0; display: grid; gap: .4rem; }
+    button, input, select { max-width: 100%; min-width: 0; font: inherit; padding: .65rem; }
+    button { cursor: pointer; }
+    [role="alert"] { color: #b42318; }
+    @media (prefers-color-scheme: dark) { [role="alert"] { color: #ff8a80; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Gerar legenda</h1>
+    <form data-testid="form" method="POST" action="/subtitles" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="__CSRF_TOKEN__">
+      <label>Arquivo de vídeo ou áudio
+        <input data-testid="video-input" type="file" name="video" accept=".mp4,.mkv,.mov,.webm,.avi,.mp3,.wav,.m4a,.flac,.ogg" required>
+      </label>
+      <label>Idioma
+        <select data-testid="language-select" name="language">
+          <option value="auto" selected>Detectar automaticamente</option>
+          <option value="ja">Japonês</option>
+          <option value="zh">Chinês</option>
+        </select>
+      </label>
+      <label><span><input data-testid="skip-refine" type="checkbox" name="skipRefine"> Pular refinamento</span></label>
+      <button data-testid="submit" type="submit">Gerar legenda</button>
+      <p data-testid="status" role="status" aria-live="polite"></p>
+      <p data-testid="error" role="alert"></p>
+    </form>
+  </main>
+  <script>
+    const form = document.querySelector('[data-testid="form"]');
+    const button = form.querySelector('[data-testid="submit"]');
+    const status = form.querySelector('[data-testid="status"]');
+    const error = form.querySelector('[data-testid="error"]');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.textContent = '';
+      if (!form.elements.video.files.length) { error.textContent = 'Selecione um arquivo.'; return; }
+      button.disabled = true;
+      const started = Date.now();
+      const showTime = () => { status.textContent = `Processando… isso pode levar alguns minutos (${Math.floor((Date.now() - started) / 1000)}s)`; };
+      showTime();
+      const timer = setInterval(showTime, 1000);
+      try {
+        const response = await fetch('/subtitles', { method: 'POST', body: new FormData(form) });
+        if (!response.ok) throw new Error(await response.text());
+        const blob = await response.blob();
+        const header = response.headers.get('Content-Disposition') || '';
+        const encoded = header.match(/filename\*=UTF-8''([^;]+)/i);
+        const filename = encoded ? decodeURIComponent(encoded[1].trim()) : 'legenda.en.srt';
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        status.textContent = 'Legenda gerada';
+      } catch (reason) {
+        status.textContent = '';
+        error.textContent = reason.message || 'Não foi possível gerar a legenda.';
+      } finally {
+        clearInterval(timer);
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
