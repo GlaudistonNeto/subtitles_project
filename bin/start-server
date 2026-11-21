@@ -1,0 +1,17 @@
+#!/bin/bash
+# Script para iniciar o servidor de legendas do projeto.
+# Garante que o binário no diretório de build seja executado com o subcomando serve.
+
+# Caminho absoluto para o binário de produção/debug
+BIN_PATH="/home/spike/subtitles_project/rust/whisper-runtime/target/debug/subtitles"
+
+if [ -f "$BIN_PATH" ]; then
+    echo "Iniciando o servidor em http://localhost:3333..."
+    $BIN_PATH serve
+else
+    echo "Erro: Binário não encontrado em $BIN_PATH"
+    echo "Certifique-se de que o projeto foi compilado usando 'cargo build' primeiro."
+    exit 1
+fi
+
+
