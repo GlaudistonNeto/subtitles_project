@@ -25,9 +25,24 @@
       <label>Arquivo de vídeo ou áudio
         <input data-testid="video-input" type="file" name="video" accept=".mp4,.mkv,.mov,.webm,.avi,.mp3,.wav,.m4a,.flac,.ogg" required>
       </label>
-      <label>Idioma
+      <label>Idioma do vídeo
         <select data-testid="language-select" name="language">
           <option value="auto" selected>Detectar automaticamente</option>
+          <option value="pt">Português</option>
+          <option value="de">Alemão</option>
+          <option value="es">Espanhol</option>
+          <option value="ru">Russo</option>
+          <option value="ja">Japonês</option>
+          <option value="zh">Chinês</option>
+        </select>
+      </label>
+      <label>Idioma da legenda
+        <select data-testid="subtitle-language-select" name="subtitle_language">
+          <option value="auto" selected>Detectar automaticamente</option>
+          <option value="pt">Português</option>
+          <option value="de">Alemão</option>
+          <option value="es">Espanhol</option>
+          <option value="ru">Russo</option>
           <option value="ja">Japonês</option>
           <option value="zh">Chinês</option>
         </select>
