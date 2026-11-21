@@ -35,7 +35,7 @@ build_with_libclang() {
     echo "Building with libclang support..."
     cd "$PROJECT_ROOT"
     cargo clean -p whisper-rs-sys 2>/dev/null || true
-    cargo build --release
+    cargo build --release --features cuda
     if [ -f "$PROJECT_ROOT/target/release/subtitles" ]; then
         cp "$PROJECT_ROOT/target/release/subtitles" "/home/spike/subtitles_project/bin/"
         echo "✅ Binary copied to /home/spike/subtitles_project/bin/subtitles"
@@ -104,7 +104,7 @@ main() {
     echo "Attempting to compile with available libclang..."
     
     local exit_code=0
-    cargo build --release -q 2>&1 || {
+    cargo build --release --features cuda -q 2>&1 || {
         echo "Compilation failed. See COMPILATION_STATUS.md for alternatives."
         exit_code=1
     }
@@ -170,7 +170,7 @@ sudo apt-get update && sudo apt-get install -y \
 ## Build Command
 ```bash
 cd /home/spike/subtitles_project/rust/whisper-runtime
-cargo build --release
+cargo build --release --features cuda
 cp target/release/subtitles bin/
 ```
 
@@ -178,7 +178,7 @@ cp target/release/subtitles bin/
 ```bash
 docker run -it --rm -v $(pwd)/rust/whisper-runtime:/build \
     rust:latest bash \
-    && cd /build && cargo build --release
+    && cd /build && cargo build --release --features cuda
 ```
 
 GUIDE_EOF
