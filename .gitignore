@@ -4,6 +4,9 @@
 *.pin
 *:Zone.Identifier
 
+# AI agents
+.github
+
 # Segredos e dependências
 .env
 node_modules/

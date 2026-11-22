@@ -36,9 +36,11 @@ pub fn default_output_path(input_path: &Path) -> PathBuf {
 }
 
 fn validate_options(options: &PipelineOptions) -> Result<()> {
-    if !matches!(options.language.as_str(), "ja" | "zh" | "en" | "es" | "pt" | "de" | "ru" | "auto") {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput, "language must be ja, zh, en, es, pt, de, ru, or auto").into());
+    if !matches!(options.language.as_str(), "ja" | "zh" | "pt" | "de" | "es" | "ru" | "auto") {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "language must be ja, zh, pt, de, es, ru, or auto").into());
     }
+
+
     Ok(())
 }
 

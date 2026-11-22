@@ -223,7 +223,7 @@ async fn subtitles(
     if csrf.as_deref() != Some(cookie.as_str()) {
         return bad_request("Invalid CSRF token.");
     }
-    if !matches!(language.as_str(), "ja" | "zh" | "en" | "es" | "pt" | "de" | "ru" | "auto") {
+    if !matches!(language.as_str(), "ja" | "zh" | "pt" | "de" | "es" | "ru" | "auto") {
         return bad_request("Invalid language.");
     }
     let Some(upload) = upload else {
